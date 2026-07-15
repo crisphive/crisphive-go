@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -21,17 +21,18 @@ var _ MappedNullable = &JobRequestSession{}
 // JobRequestSession struct for JobRequestSession
 type JobRequestSession struct {
 	// Calendar day (YYYY-MM-DD) this session falls on, business-local.
-	Date *time.Time `json:"date,omitempty"`
-	// DepartAt / ReturnAt bracket the technician's whole day (leave home / arrive home), derived from travel. Omitted together when travel is unknown.
+	Date *string `json:"date,omitempty"`
+	// Leave-home time bracketing the day: StartAt minus planned travel (UTC). Omitted (with return_at) when travel is unknown.
 	DepartAt *time.Time `json:"depart_at,omitempty"`
-	// On-site end of this day's work block (UTC).
+	// Leave site — end of demobilization (UTC).
 	EndAt *time.Time `json:"end_at,omitempty"`
 	// 1-based day index within the job's span (1 for single-day jobs).
 	Ordinal *int32 `json:"ordinal,omitempty"`
+	// Arrive-home time bracketing the day: EndAt plus planned travel (UTC). Omitted (with depart_at) when travel is unknown.
 	ReturnAt *time.Time `json:"return_at,omitempty"`
-	// On-site start of this day's work block (UTC).
+	// On-site arrival — start of mobilization (UTC).
 	StartAt *time.Time `json:"start_at,omitempty"`
-	// TravelMinutes is the planned one-way commute for this day. Omitted when unknown (admin-fallback job without geocoded location, or legacy row).
+	// TravelMinutes is the PLANNED one-way commute (home → site) for this day, snapshotted at assignment. Omitted when unknown (admin-fallback job with no geocoded location, or legacy row).
 	TravelMinutes *int32 `json:"travel_minutes,omitempty"`
 }
 
@@ -53,9 +54,9 @@ func NewJobRequestSessionWithDefaults() *JobRequestSession {
 }
 
 // GetDate returns the Date field value if set, zero value otherwise.
-func (o *JobRequestSession) GetDate() time.Time {
+func (o *JobRequestSession) GetDate() string {
 	if o == nil || IsNil(o.Date) {
-		var ret time.Time
+		var ret string
 		return ret
 	}
 	return *o.Date
@@ -63,7 +64,7 @@ func (o *JobRequestSession) GetDate() time.Time {
 
 // GetDateOk returns a tuple with the Date field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobRequestSession) GetDateOk() (*time.Time, bool) {
+func (o *JobRequestSession) GetDateOk() (*string, bool) {
 	if o == nil || IsNil(o.Date) {
 		return nil, false
 	}
@@ -79,8 +80,8 @@ func (o *JobRequestSession) HasDate() bool {
 	return false
 }
 
-// SetDate gets a reference to the given time.Time and assigns it to the Date field.
-func (o *JobRequestSession) SetDate(v time.Time) {
+// SetDate gets a reference to the given string and assigns it to the Date field.
+func (o *JobRequestSession) SetDate(v string) {
 	o.Date = &v
 }
 

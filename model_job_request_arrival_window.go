@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -12,6 +12,7 @@ package crisphive
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // checks if the JobRequestArrivalWindow type satisfies the MappedNullable interface at compile time
@@ -20,9 +21,9 @@ var _ MappedNullable = &JobRequestArrivalWindow{}
 // JobRequestArrivalWindow struct for JobRequestArrivalWindow
 type JobRequestArrivalWindow struct {
 	// Window end (UTC) = start + window_minutes.
-	End *string `json:"end,omitempty"`
+	End *time.Time `json:"end,omitempty"`
 	// Window start (UTC); render in business/customer timezone.
-	Start *string `json:"start,omitempty"`
+	Start *time.Time `json:"start,omitempty"`
 	// Width of the arrival window, in minutes.
 	WindowMinutes *int32 `json:"window_minutes,omitempty"`
 }
@@ -45,9 +46,9 @@ func NewJobRequestArrivalWindowWithDefaults() *JobRequestArrivalWindow {
 }
 
 // GetEnd returns the End field value if set, zero value otherwise.
-func (o *JobRequestArrivalWindow) GetEnd() string {
+func (o *JobRequestArrivalWindow) GetEnd() time.Time {
 	if o == nil || IsNil(o.End) {
-		var ret string
+		var ret time.Time
 		return ret
 	}
 	return *o.End
@@ -55,7 +56,7 @@ func (o *JobRequestArrivalWindow) GetEnd() string {
 
 // GetEndOk returns a tuple with the End field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobRequestArrivalWindow) GetEndOk() (*string, bool) {
+func (o *JobRequestArrivalWindow) GetEndOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.End) {
 		return nil, false
 	}
@@ -71,15 +72,15 @@ func (o *JobRequestArrivalWindow) HasEnd() bool {
 	return false
 }
 
-// SetEnd gets a reference to the given string and assigns it to the End field.
-func (o *JobRequestArrivalWindow) SetEnd(v string) {
+// SetEnd gets a reference to the given time.Time and assigns it to the End field.
+func (o *JobRequestArrivalWindow) SetEnd(v time.Time) {
 	o.End = &v
 }
 
 // GetStart returns the Start field value if set, zero value otherwise.
-func (o *JobRequestArrivalWindow) GetStart() string {
+func (o *JobRequestArrivalWindow) GetStart() time.Time {
 	if o == nil || IsNil(o.Start) {
-		var ret string
+		var ret time.Time
 		return ret
 	}
 	return *o.Start
@@ -87,7 +88,7 @@ func (o *JobRequestArrivalWindow) GetStart() string {
 
 // GetStartOk returns a tuple with the Start field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobRequestArrivalWindow) GetStartOk() (*string, bool) {
+func (o *JobRequestArrivalWindow) GetStartOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.Start) {
 		return nil, false
 	}
@@ -103,8 +104,8 @@ func (o *JobRequestArrivalWindow) HasStart() bool {
 	return false
 }
 
-// SetStart gets a reference to the given string and assigns it to the Start field.
-func (o *JobRequestArrivalWindow) SetStart(v string) {
+// SetStart gets a reference to the given time.Time and assigns it to the Start field.
+func (o *JobRequestArrivalWindow) SetStart(v time.Time) {
 	o.Start = &v
 }
 

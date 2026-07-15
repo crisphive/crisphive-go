@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -12,6 +12,7 @@ package crisphive
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // checks if the JobRequestActionAuditEntry type satisfies the MappedNullable interface at compile time
@@ -20,7 +21,7 @@ var _ MappedNullable = &JobRequestActionAuditEntry{}
 // JobRequestActionAuditEntry struct for JobRequestActionAuditEntry
 type JobRequestActionAuditEntry struct {
 	// When the action was fired (UTC).
-	At *string `json:"at,omitempty"`
+	At *time.Time `json:"at,omitempty"`
 	// Who fired the action.
 	By *JobRequestActionAuditBy `json:"by,omitempty"`
 	// Payload is the raw capability payload (e.g. {\"location\":{\"lat\":..., \"lng\":...}} for client_location). Forwarded as json.RawMessage so FE receives a real JSON object, NOT a stringified blob. `swaggertype` hints the older swag CLI used in the Docker build pipeline (it does not natively recognise json.RawMessage).
@@ -45,9 +46,9 @@ func NewJobRequestActionAuditEntryWithDefaults() *JobRequestActionAuditEntry {
 }
 
 // GetAt returns the At field value if set, zero value otherwise.
-func (o *JobRequestActionAuditEntry) GetAt() string {
+func (o *JobRequestActionAuditEntry) GetAt() time.Time {
 	if o == nil || IsNil(o.At) {
-		var ret string
+		var ret time.Time
 		return ret
 	}
 	return *o.At
@@ -55,7 +56,7 @@ func (o *JobRequestActionAuditEntry) GetAt() string {
 
 // GetAtOk returns a tuple with the At field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobRequestActionAuditEntry) GetAtOk() (*string, bool) {
+func (o *JobRequestActionAuditEntry) GetAtOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.At) {
 		return nil, false
 	}
@@ -71,8 +72,8 @@ func (o *JobRequestActionAuditEntry) HasAt() bool {
 	return false
 }
 
-// SetAt gets a reference to the given string and assigns it to the At field.
-func (o *JobRequestActionAuditEntry) SetAt(v string) {
+// SetAt gets a reference to the given time.Time and assigns it to the At field.
+func (o *JobRequestActionAuditEntry) SetAt(v time.Time) {
 	o.At = &v
 }
 

@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -36,11 +36,13 @@ type Vehicle struct {
 	Model *string `json:"model,omitempty"`
 	// Vehicle display name.
 	Name *string `json:"name,omitempty"`
+	// Live operational state derived from the vehicle's jobs: on_job = a job's scheduled window contains now (the vehicle is out working); assigned = attached to an upcoming/open job that is not in progress; other values mirror status.
+	OperationalStatus *string `json:"operational_status,omitempty"`
 	// The technician who currently owns (claimed) this vehicle; null if unowned.
 	Owner *VehicleOwner `json:"owner,omitempty"`
 	// License plate number. Empty if not set.
 	PlateNumber *string `json:"plate_number,omitempty"`
-	// Operational status.
+	// Stored status. on_job here means \"attached to an open job\" (set at assignment, cleared at complete/archive/unassign) — see operational_status for the live state.
 	Status *string `json:"status,omitempty"`
 	// UUIDs of technicians who use this vehicle (derived from each technician's vehicle list). Empty array if none.
 	TechnicianIds []string `json:"technician_ids,omitempty"`
@@ -325,6 +327,38 @@ func (o *Vehicle) HasName() bool {
 // SetName gets a reference to the given string and assigns it to the Name field.
 func (o *Vehicle) SetName(v string) {
 	o.Name = &v
+}
+
+// GetOperationalStatus returns the OperationalStatus field value if set, zero value otherwise.
+func (o *Vehicle) GetOperationalStatus() string {
+	if o == nil || IsNil(o.OperationalStatus) {
+		var ret string
+		return ret
+	}
+	return *o.OperationalStatus
+}
+
+// GetOperationalStatusOk returns a tuple with the OperationalStatus field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Vehicle) GetOperationalStatusOk() (*string, bool) {
+	if o == nil || IsNil(o.OperationalStatus) {
+		return nil, false
+	}
+	return o.OperationalStatus, true
+}
+
+// HasOperationalStatus returns a boolean if a field has been set.
+func (o *Vehicle) HasOperationalStatus() bool {
+	if o != nil && !IsNil(o.OperationalStatus) {
+		return true
+	}
+
+	return false
+}
+
+// SetOperationalStatus gets a reference to the given string and assigns it to the OperationalStatus field.
+func (o *Vehicle) SetOperationalStatus(v string) {
+	o.OperationalStatus = &v
 }
 
 // GetOwner returns the Owner field value if set, zero value otherwise.
@@ -616,6 +650,9 @@ func (o Vehicle) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
+	}
+	if !IsNil(o.OperationalStatus) {
+		toSerialize["operational_status"] = o.OperationalStatus
 	}
 	if !IsNil(o.Owner) {
 		toSerialize["owner"] = o.Owner

@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -20,11 +20,13 @@ var _ MappedNullable = &JobRequestCrewMember{}
 
 // JobRequestCrewMember struct for JobRequestCrewMember
 type JobRequestCrewMember struct {
+	// Crew member's email; null if not available.
 	Email *string `json:"email,omitempty"`
 	// This member's last session end (UTC). Omitted when no session plan exists.
 	EndsAt *time.Time `json:"ends_at,omitempty"`
-	// JobTitle/Phone/Email — crew member's contact (resolved like the customer block). Empty for a planned-but-unassigned slot.
+	// Crew member's job title. Empty for a planned-but-unassigned slot.
 	JobTitle *string `json:"job_title,omitempty"`
+	// Crew member's phone; null if not available.
 	Phone *string `json:"phone,omitempty"`
 	// Role of this member on the job.
 	Role *string `json:"role,omitempty"`
@@ -34,8 +36,9 @@ type JobRequestCrewMember struct {
 	SkillIds []string `json:"skill_ids,omitempty"`
 	// Resolved skills (id+name) for SkillIDs. Omitted when the slot carries no skill requirement.
 	Skills []JobRequestSkillSummary `json:"skills,omitempty"`
-	// TechnicianID/Name identify the assigned technician. Empty for a planned- but-unassigned crew member (quoted, not yet confirmed/assigned).
+	// UUID of the assigned technician. Empty for a planned-but-unassigned crew member (quoted, not yet confirmed/assigned).
 	TechnicianId *string `json:"technician_id,omitempty"`
+	// Full name of the assigned technician. Empty for a planned-but-unassigned slot.
 	TechnicianName *string `json:"technician_name,omitempty"`
 	// Share of the job's man-hours this member works (1–100). Omitted for a single-person job.
 	WrenchPercent *int32 `json:"wrench_percent,omitempty"`

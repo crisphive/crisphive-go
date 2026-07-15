@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -12,6 +12,7 @@ package crisphive
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // checks if the TechnicianList type satisfies the MappedNullable interface at compile time
@@ -24,7 +25,7 @@ type TechnicianList struct {
 	// Page/limit/total pagination metadata.
 	Meta *Pagination `json:"meta,omitempty"`
 	// Cursor for short-polling: pass back as `since` to fetch only rows changed after this point (RFC3339).
-	NextSince *string `json:"next_since,omitempty"`
+	NextSince *time.Time `json:"next_since,omitempty"`
 	// The technicians on this page.
 	Technicians []Technician `json:"technicians,omitempty"`
 }
@@ -111,9 +112,9 @@ func (o *TechnicianList) SetMeta(v Pagination) {
 }
 
 // GetNextSince returns the NextSince field value if set, zero value otherwise.
-func (o *TechnicianList) GetNextSince() string {
+func (o *TechnicianList) GetNextSince() time.Time {
 	if o == nil || IsNil(o.NextSince) {
-		var ret string
+		var ret time.Time
 		return ret
 	}
 	return *o.NextSince
@@ -121,7 +122,7 @@ func (o *TechnicianList) GetNextSince() string {
 
 // GetNextSinceOk returns a tuple with the NextSince field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TechnicianList) GetNextSinceOk() (*string, bool) {
+func (o *TechnicianList) GetNextSinceOk() (*time.Time, bool) {
 	if o == nil || IsNil(o.NextSince) {
 		return nil, false
 	}
@@ -137,8 +138,8 @@ func (o *TechnicianList) HasNextSince() bool {
 	return false
 }
 
-// SetNextSince gets a reference to the given string and assigns it to the NextSince field.
-func (o *TechnicianList) SetNextSince(v string) {
+// SetNextSince gets a reference to the given time.Time and assigns it to the NextSince field.
+func (o *TechnicianList) SetNextSince(v time.Time) {
 	o.NextSince = &v
 }
 

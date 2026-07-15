@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -43,7 +43,7 @@ type Technician struct {
 	// Free-form job title (e.g. \"Senior HVAC Technician\"). Empty if unset.
 	JobTitle *string `json:"job_title,omitempty"`
 	// Date the technician joined (YYYY-MM-DD); null if unset.
-	JoinDate *Date `json:"join_date,omitempty"`
+	JoinDate *string `json:"join_date,omitempty"`
 	// When the technician last logged in (RFC3339); null if never.
 	LastLoginAt *time.Time `json:"last_login_at,omitempty"`
 	// Leads this technician is a buddy of (id + name).
@@ -440,9 +440,9 @@ func (o *Technician) SetJobTitle(v string) {
 }
 
 // GetJoinDate returns the JoinDate field value if set, zero value otherwise.
-func (o *Technician) GetJoinDate() Date {
+func (o *Technician) GetJoinDate() string {
 	if o == nil || IsNil(o.JoinDate) {
-		var ret Date
+		var ret string
 		return ret
 	}
 	return *o.JoinDate
@@ -450,7 +450,7 @@ func (o *Technician) GetJoinDate() Date {
 
 // GetJoinDateOk returns a tuple with the JoinDate field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Technician) GetJoinDateOk() (*Date, bool) {
+func (o *Technician) GetJoinDateOk() (*string, bool) {
 	if o == nil || IsNil(o.JoinDate) {
 		return nil, false
 	}
@@ -466,8 +466,8 @@ func (o *Technician) HasJoinDate() bool {
 	return false
 }
 
-// SetJoinDate gets a reference to the given Date and assigns it to the JoinDate field.
-func (o *Technician) SetJoinDate(v Date) {
+// SetJoinDate gets a reference to the given string and assigns it to the JoinDate field.
+func (o *Technician) SetJoinDate(v string) {
 	o.JoinDate = &v
 }
 

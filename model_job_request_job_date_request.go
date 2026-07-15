@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -12,7 +12,6 @@ package crisphive
 
 import (
 	"encoding/json"
-	"time"
 	"bytes"
 	"fmt"
 )
@@ -23,7 +22,7 @@ var _ MappedNullable = &JobRequestJobDateRequest{}
 // JobRequestJobDateRequest struct for JobRequestJobDateRequest
 type JobRequestJobDateRequest struct {
 	// Requested calendar day (YYYY-MM-DD), customer-local. Required.
-	Date time.Time `json:"date"`
+	Date string `json:"date"`
 	// One or more time-of-day periods requested on this date. At least one, up to 3.
 	Periods []JobRequestJobDatePeriodRequest `json:"periods"`
 }
@@ -34,7 +33,7 @@ type _JobRequestJobDateRequest JobRequestJobDateRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewJobRequestJobDateRequest(date time.Time, periods []JobRequestJobDatePeriodRequest) *JobRequestJobDateRequest {
+func NewJobRequestJobDateRequest(date string, periods []JobRequestJobDatePeriodRequest) *JobRequestJobDateRequest {
 	this := JobRequestJobDateRequest{}
 	this.Date = date
 	this.Periods = periods
@@ -50,9 +49,9 @@ func NewJobRequestJobDateRequestWithDefaults() *JobRequestJobDateRequest {
 }
 
 // GetDate returns the Date field value
-func (o *JobRequestJobDateRequest) GetDate() time.Time {
+func (o *JobRequestJobDateRequest) GetDate() string {
 	if o == nil {
-		var ret time.Time
+		var ret string
 		return ret
 	}
 
@@ -61,7 +60,7 @@ func (o *JobRequestJobDateRequest) GetDate() time.Time {
 
 // GetDateOk returns a tuple with the Date field value
 // and a boolean to check if the value has been set.
-func (o *JobRequestJobDateRequest) GetDateOk() (*time.Time, bool) {
+func (o *JobRequestJobDateRequest) GetDateOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -69,7 +68,7 @@ func (o *JobRequestJobDateRequest) GetDateOk() (*time.Time, bool) {
 }
 
 // SetDate sets field value
-func (o *JobRequestJobDateRequest) SetDate(v time.Time) {
+func (o *JobRequestJobDateRequest) SetDate(v string) {
 	o.Date = v
 }
 

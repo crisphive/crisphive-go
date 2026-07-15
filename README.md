@@ -1,8 +1,8 @@
-# CrispHive Go
+# Crisphive Go
 
-The official Go SDK for the [CrispHive API](https://docs.crisphive.com/).
+The official Go SDK for the [Crisphive API](https://docs.crisphive.com/).
 
-This library is generated from the CrispHive OpenAPI specification and gives you
+This library is generated from the Crisphive OpenAPI specification and gives you
 typed access to the public `/v1` API — customers, bookings, catalog, team and
 fleet.
 
@@ -19,7 +19,7 @@ go get github.com/crisphive/crisphive-go
 ## Authentication
 
 Every request is authenticated with a secret API key sent as a bearer token.
-Create keys from your CrispHive business dashboard. **The key prefix selects the
+Create keys from your Crisphive business dashboard. **The key prefix selects the
 data environment:**
 
 - `chsk_live_…` → live (production) data
@@ -83,7 +83,7 @@ the shared config's default headers.
 ## Errors
 
 A non-2xx response returns an error and a `*http.Response`; inspect
-`res.StatusCode` and the decoded body for the CrispHive error code.
+`res.StatusCode` and the decoded body for the Crisphive error code.
 
 ## Documentation
 

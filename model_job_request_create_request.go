@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -29,8 +29,12 @@ type JobRequestCreateRequest struct {
 	JobDates []JobRequestJobDateRequest `json:"job_dates"`
 	// UUID of the job type to classify this job. Optional; null leaves the job unclassified.
 	JobTypeId *string `json:"job_type_id,omitempty"`
+	// Scheduling priority. Optional; omitted bookings receive the business's default_priority setting (assignment settings, default p2). p0=emergency (interrupt-driven insert), p1=top (displaced only by p0), p2=standard, p3=deferrable (first candidate for displacement).
+	Priority *string `json:"priority,omitempty"`
 	// UUIDs of the skills the customer desires for this job. Optional; up to 20.
 	SkillIds []string `json:"skill_ids,omitempty"`
+	// SLA deadline (business-local naive datetime, e.g. \"2030-06-14T17:00:00\"). Optional; ONLY valid together with priority=p1 — arms the auto-escalation clock (the job escalates to p0 as breach risk crosses the business's safety buffer). Must be in the future.
+	SlaDeadline *string `json:"sla_deadline,omitempty"`
 }
 
 type _JobRequestCreateRequest JobRequestCreateRequest
@@ -166,6 +170,38 @@ func (o *JobRequestCreateRequest) SetJobTypeId(v string) {
 	o.JobTypeId = &v
 }
 
+// GetPriority returns the Priority field value if set, zero value otherwise.
+func (o *JobRequestCreateRequest) GetPriority() string {
+	if o == nil || IsNil(o.Priority) {
+		var ret string
+		return ret
+	}
+	return *o.Priority
+}
+
+// GetPriorityOk returns a tuple with the Priority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequestCreateRequest) GetPriorityOk() (*string, bool) {
+	if o == nil || IsNil(o.Priority) {
+		return nil, false
+	}
+	return o.Priority, true
+}
+
+// HasPriority returns a boolean if a field has been set.
+func (o *JobRequestCreateRequest) HasPriority() bool {
+	if o != nil && !IsNil(o.Priority) {
+		return true
+	}
+
+	return false
+}
+
+// SetPriority gets a reference to the given string and assigns it to the Priority field.
+func (o *JobRequestCreateRequest) SetPriority(v string) {
+	o.Priority = &v
+}
+
 // GetSkillIds returns the SkillIds field value if set, zero value otherwise.
 func (o *JobRequestCreateRequest) GetSkillIds() []string {
 	if o == nil || IsNil(o.SkillIds) {
@@ -198,6 +234,38 @@ func (o *JobRequestCreateRequest) SetSkillIds(v []string) {
 	o.SkillIds = v
 }
 
+// GetSlaDeadline returns the SlaDeadline field value if set, zero value otherwise.
+func (o *JobRequestCreateRequest) GetSlaDeadline() string {
+	if o == nil || IsNil(o.SlaDeadline) {
+		var ret string
+		return ret
+	}
+	return *o.SlaDeadline
+}
+
+// GetSlaDeadlineOk returns a tuple with the SlaDeadline field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequestCreateRequest) GetSlaDeadlineOk() (*string, bool) {
+	if o == nil || IsNil(o.SlaDeadline) {
+		return nil, false
+	}
+	return o.SlaDeadline, true
+}
+
+// HasSlaDeadline returns a boolean if a field has been set.
+func (o *JobRequestCreateRequest) HasSlaDeadline() bool {
+	if o != nil && !IsNil(o.SlaDeadline) {
+		return true
+	}
+
+	return false
+}
+
+// SetSlaDeadline gets a reference to the given string and assigns it to the SlaDeadline field.
+func (o *JobRequestCreateRequest) SetSlaDeadline(v string) {
+	o.SlaDeadline = &v
+}
+
 func (o JobRequestCreateRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -216,8 +284,14 @@ func (o JobRequestCreateRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.JobTypeId) {
 		toSerialize["job_type_id"] = o.JobTypeId
 	}
+	if !IsNil(o.Priority) {
+		toSerialize["priority"] = o.Priority
+	}
 	if !IsNil(o.SkillIds) {
 		toSerialize["skill_ids"] = o.SkillIds
+	}
+	if !IsNil(o.SlaDeadline) {
+		toSerialize["sla_deadline"] = o.SlaDeadline
 	}
 	return toSerialize, nil
 }

@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -12,7 +12,6 @@ package crisphive
 
 import (
 	"encoding/json"
-	"time"
 )
 
 // checks if the JobDateBusinessRange type satisfies the MappedNullable interface at compile time
@@ -20,9 +19,13 @@ var _ MappedNullable = &JobDateBusinessRange{}
 
 // JobDateBusinessRange struct for JobDateBusinessRange
 type JobDateBusinessRange struct {
-	Date *time.Time `json:"date,omitempty"`
+	// Calendar day (YYYY-MM-DD) this range falls on, business-local.
+	Date *string `json:"date,omitempty"`
+	// Range end as minutes since business-local midnight (0–1440); 1440 = end of day.
 	EndMinute *int32 `json:"end_minute,omitempty"`
+	// Time-of-day period this range backs.
 	Period *JobDatePeriod `json:"period,omitempty"`
+	// Range start as minutes since business-local midnight (0–1440).
 	StartMinute *int32 `json:"start_minute,omitempty"`
 }
 
@@ -44,9 +47,9 @@ func NewJobDateBusinessRangeWithDefaults() *JobDateBusinessRange {
 }
 
 // GetDate returns the Date field value if set, zero value otherwise.
-func (o *JobDateBusinessRange) GetDate() time.Time {
+func (o *JobDateBusinessRange) GetDate() string {
 	if o == nil || IsNil(o.Date) {
-		var ret time.Time
+		var ret string
 		return ret
 	}
 	return *o.Date
@@ -54,7 +57,7 @@ func (o *JobDateBusinessRange) GetDate() time.Time {
 
 // GetDateOk returns a tuple with the Date field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *JobDateBusinessRange) GetDateOk() (*time.Time, bool) {
+func (o *JobDateBusinessRange) GetDateOk() (*string, bool) {
 	if o == nil || IsNil(o.Date) {
 		return nil, false
 	}
@@ -70,8 +73,8 @@ func (o *JobDateBusinessRange) HasDate() bool {
 	return false
 }
 
-// SetDate gets a reference to the given time.Time and assigns it to the Date field.
-func (o *JobDateBusinessRange) SetDate(v time.Time) {
+// SetDate gets a reference to the given string and assigns it to the Date field.
+func (o *JobDateBusinessRange) SetDate(v string) {
 	o.Date = &v
 }
 

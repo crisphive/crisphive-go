@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -20,14 +20,21 @@ var _ MappedNullable = &Skill{}
 
 // Skill struct for Skill
 type Skill struct {
+	// UUID of the category this skill belongs to.
 	CategoryId *string `json:"category_id,omitempty"`
+	// When the skill was created (RFC3339, UTC).
 	CreatedAt *time.Time `json:"created_at,omitempty"`
+	// Free-form description of the skill.
 	Description *string `json:"description,omitempty"`
+	// Skill UUID — pass this in `skill_ids` when creating a job request.
 	Id *string `json:"id,omitempty"`
+	// Whether the skill is active and bookable.
 	IsActive *bool `json:"is_active,omitempty"`
 	// Members is the count of active (non-deleted) technicians currently assigned to this skill.
 	Members *int32 `json:"members,omitempty"`
+	// Skill name.
 	Name *string `json:"name,omitempty"`
+	// When the skill was last modified (RFC3339, UTC).
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 

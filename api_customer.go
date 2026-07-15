@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -28,11 +28,18 @@ type ApiCreateCustomerRequest struct {
 	ctx context.Context
 	ApiService *CustomerAPIService
 	customerCreateRequest *CustomerCreateRequest
+	idempotencyKey *string
 }
 
 // Customer details
 func (r ApiCreateCustomerRequest) CustomerCreateRequest(customerCreateRequest CustomerCreateRequest) ApiCreateCustomerRequest {
 	r.customerCreateRequest = &customerCreateRequest
+	return r
+}
+
+// Unique key making retries safe: a repeat send with the same key replays the original response (header Idempotent-Replayed: true) instead of re-running the operation. Reusing a key with a different body returns 422 IDEMPOTENCY_KEY_REUSE.
+func (r ApiCreateCustomerRequest) IdempotencyKey(idempotencyKey string) ApiCreateCustomerRequest {
+	r.idempotencyKey = &idempotencyKey
 	return r
 }
 
@@ -43,7 +50,7 @@ func (r ApiCreateCustomerRequest) Execute() (*CreateCustomer200Response, *http.R
 /*
 CreateCustomer Create a customer
 
-Adds a new customer record to the current business. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested `address` object. service_area_id must be a valid service area UUID belonging to this business.
+Creates a customer record — the client/account profile a job request (work order) is booked against; use it to import or sync customers from your own CRM, website lead form or intake flow. Address (street, city, postal_code, ...) and coordinates (latitude/longitude) live under the nested `address` object. service_area_id must be a valid service area UUID belonging to this business.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiCreateCustomerRequest
@@ -95,6 +102,9 @@ func (a *CustomerAPIService) CreateCustomerExecute(r ApiCreateCustomerRequest) (
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.idempotencyKey != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "Idempotency-Key", r.idempotencyKey, "simple", "")
 	}
 	// body params
 	localVarPostBody = r.customerCreateRequest
@@ -162,6 +172,17 @@ func (a *CustomerAPIService) CreateCustomerExecute(r ApiCreateCustomerRequest) (
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v ResponseEnvelope
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -191,7 +212,7 @@ func (r ApiDeleteCustomerRequest) Execute() (*ResponseEnvelope, *http.Response, 
 /*
 DeleteCustomer Delete a customer
 
-Soft-deletes a customer record.
+Soft-deletes a customer record, removing it from the active customer directory; existing bookings keep their customer snapshot.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Customer ID
@@ -286,6 +307,17 @@ func (a *CustomerAPIService) DeleteCustomerExecute(r ApiDeleteCustomerRequest) (
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v ResponseEnvelope
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -315,7 +347,7 @@ func (r ApiGetCustomerRequest) Execute() (*GetCustomer200Response, *http.Respons
 /*
 GetCustomer Get a customer
 
-Returns the full profile, contact details and spending summary. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
+Returns the full customer record: profile, contact details, tier and lifetime spending summary — a 360° client view for support, upsell or CRM enrichment. contact.preferred_technician includes {id, name}. contact.service_area includes {id, name}. contact.address.latitude / contact.address.longitude are null if no coordinates saved.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Customer ID (UUID)
@@ -410,6 +442,17 @@ func (a *CustomerAPIService) GetCustomerExecute(r ApiGetCustomerRequest) (*GetCu
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v ResponseEnvelope
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -494,7 +537,7 @@ func (r ApiListCustomersRequest) Execute() (*ListCustomers200Response, *http.Res
 /*
 ListCustomers List customers
 
-Returns a paginated, searchable list of customers for the current business.
+Returns a paginated, searchable directory of the business's customer records — the customer database (CRM) behind every booking and work order. Supports the `since`/`next_since` cursor for incremental sync into an external CRM, ERP or marketing tool.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiListCustomersRequest
@@ -618,6 +661,17 @@ func (a *CustomerAPIService) ListCustomersExecute(r ApiListCustomersRequest) (*L
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v ResponseEnvelope
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -654,7 +708,7 @@ func (r ApiUpdateCustomerRequest) Execute() (*ResponseEnvelope, *http.Response, 
 /*
 UpdateCustomer Update a customer
 
-Replaces mutable fields on a customer record. Pass service_area_id="" to clear the service area. Address fields (including latitude/longitude) live under the nested `address` object.
+Replaces mutable fields on a customer record — two-way CRM sync friendly (push changes from your system of record). Pass service_area_id="" to clear the service area. Address fields (including latitude/longitude) live under the nested `address` object.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Customer ID (UUID)
@@ -768,6 +822,17 @@ func (a *CustomerAPIService) UpdateCustomerExecute(r ApiUpdateCustomerRequest) (
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
+			var v ResponseEnvelope
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
 			var v ResponseEnvelope
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

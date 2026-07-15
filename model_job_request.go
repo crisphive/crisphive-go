@@ -1,7 +1,7 @@
 /*
-CrispHive Developer API
+Crisphive Developer API
 
-Public REST API for integrating CrispHive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
+Public REST API for integrating Crisphive from your own backend. Authenticate every request with a secret API key as a Bearer token (`Authorization: Bearer chsk_live_…`). The key prefix selects the data environment: `chsk_live_…` → production (live), `chsk_test_…` → sandbox (isolated test).  **Key scopes (restricted keys).** A key is either *full-access* (can call every endpoint below) or *restricted* to a set of permission codes chosen at creation — the same codes as the dashboard permission grid (e.g. `customers_view`, `job_create`, `team_manage`). A restricted key calling an endpoint outside its scope gets `403`. The full code list is the permission catalog (`GET /permission/modules` on the dashboard API). Create, scope, and revoke keys from the business dashboard.  Every response is wrapped in the envelope `{ \"error_code\": 0, \"message\": \"Success\", \"data\": <payload> }`.
 
 API version: 1.0
 */
@@ -30,6 +30,8 @@ type JobRequest struct {
 	AssignedVehicle *JobRequestAssignedVehicle `json:"assigned_vehicle,omitempty"`
 	// Who/what is assigned to the job.
 	Assignment *JobRequestAssignmentSummary `json:"assignment,omitempty"`
+	// Attention is the dispatch-board \"needs attention\" marker (exception tray); null when the job needs no attention.
+	Attention *JobRequestAttentionSummary `json:"attention,omitempty"`
 	// UUID of the owning business.
 	BusinessId *string `json:"business_id,omitempty"`
 	// When the job was completed (UTC); null until completed.
@@ -58,7 +60,7 @@ type JobRequest struct {
 	JobTypeName *string `json:"job_type_name,omitempty"`
 	// The action(s) the job is currently waiting on. Omitted in a terminal status.
 	NextActions []JobRequestActionSummary `json:"next_actions,omitempty"`
-	// Job priority.
+	// Scheduling priority. p0=emergency (interrupt-driven), p1=top (displaced only by p0), p2=standard, p3=deferrable (first candidate for displacement).
 	Priority *string `json:"priority,omitempty"`
 	// The time-bundle quoted for the job.
 	Quote *JobRequestQuoteSummary `json:"quote,omitempty"`
@@ -70,6 +72,12 @@ type JobRequest struct {
 	ShortCode *string `json:"short_code,omitempty"`
 	// Desired skills for the job (resolved id+name).
 	Skills []JobRequestSkillSummary `json:"skills,omitempty"`
+	// SLA deadline (UTC) armed on a p1 job; omitted when no SLA.
+	SlaDeadline *time.Time `json:"sla_deadline,omitempty"`
+	// When the SLA sweep auto-escalated this job to p0 (UTC); omitted if never.
+	SlaEscalatedAt *time.Time `json:"sla_escalated_at,omitempty"`
+	// When the sweep fired the one-shot pre-escalation warning (UTC); omitted if never.
+	SlaWarnedAt *time.Time `json:"sla_warned_at,omitempty"`
 	// Optimistic-lock version; pass back as status_version on transitions to avoid races.
 	StatusVersion *int32 `json:"status_version,omitempty"`
 	// When the job was last modified (UTC).
@@ -255,6 +263,38 @@ func (o *JobRequest) HasAssignment() bool {
 // SetAssignment gets a reference to the given JobRequestAssignmentSummary and assigns it to the Assignment field.
 func (o *JobRequest) SetAssignment(v JobRequestAssignmentSummary) {
 	o.Assignment = &v
+}
+
+// GetAttention returns the Attention field value if set, zero value otherwise.
+func (o *JobRequest) GetAttention() JobRequestAttentionSummary {
+	if o == nil || IsNil(o.Attention) {
+		var ret JobRequestAttentionSummary
+		return ret
+	}
+	return *o.Attention
+}
+
+// GetAttentionOk returns a tuple with the Attention field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequest) GetAttentionOk() (*JobRequestAttentionSummary, bool) {
+	if o == nil || IsNil(o.Attention) {
+		return nil, false
+	}
+	return o.Attention, true
+}
+
+// HasAttention returns a boolean if a field has been set.
+func (o *JobRequest) HasAttention() bool {
+	if o != nil && !IsNil(o.Attention) {
+		return true
+	}
+
+	return false
+}
+
+// SetAttention gets a reference to the given JobRequestAttentionSummary and assigns it to the Attention field.
+func (o *JobRequest) SetAttention(v JobRequestAttentionSummary) {
+	o.Attention = &v
 }
 
 // GetBusinessId returns the BusinessId field value if set, zero value otherwise.
@@ -897,6 +937,102 @@ func (o *JobRequest) SetSkills(v []JobRequestSkillSummary) {
 	o.Skills = v
 }
 
+// GetSlaDeadline returns the SlaDeadline field value if set, zero value otherwise.
+func (o *JobRequest) GetSlaDeadline() time.Time {
+	if o == nil || IsNil(o.SlaDeadline) {
+		var ret time.Time
+		return ret
+	}
+	return *o.SlaDeadline
+}
+
+// GetSlaDeadlineOk returns a tuple with the SlaDeadline field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequest) GetSlaDeadlineOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.SlaDeadline) {
+		return nil, false
+	}
+	return o.SlaDeadline, true
+}
+
+// HasSlaDeadline returns a boolean if a field has been set.
+func (o *JobRequest) HasSlaDeadline() bool {
+	if o != nil && !IsNil(o.SlaDeadline) {
+		return true
+	}
+
+	return false
+}
+
+// SetSlaDeadline gets a reference to the given time.Time and assigns it to the SlaDeadline field.
+func (o *JobRequest) SetSlaDeadline(v time.Time) {
+	o.SlaDeadline = &v
+}
+
+// GetSlaEscalatedAt returns the SlaEscalatedAt field value if set, zero value otherwise.
+func (o *JobRequest) GetSlaEscalatedAt() time.Time {
+	if o == nil || IsNil(o.SlaEscalatedAt) {
+		var ret time.Time
+		return ret
+	}
+	return *o.SlaEscalatedAt
+}
+
+// GetSlaEscalatedAtOk returns a tuple with the SlaEscalatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequest) GetSlaEscalatedAtOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.SlaEscalatedAt) {
+		return nil, false
+	}
+	return o.SlaEscalatedAt, true
+}
+
+// HasSlaEscalatedAt returns a boolean if a field has been set.
+func (o *JobRequest) HasSlaEscalatedAt() bool {
+	if o != nil && !IsNil(o.SlaEscalatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetSlaEscalatedAt gets a reference to the given time.Time and assigns it to the SlaEscalatedAt field.
+func (o *JobRequest) SetSlaEscalatedAt(v time.Time) {
+	o.SlaEscalatedAt = &v
+}
+
+// GetSlaWarnedAt returns the SlaWarnedAt field value if set, zero value otherwise.
+func (o *JobRequest) GetSlaWarnedAt() time.Time {
+	if o == nil || IsNil(o.SlaWarnedAt) {
+		var ret time.Time
+		return ret
+	}
+	return *o.SlaWarnedAt
+}
+
+// GetSlaWarnedAtOk returns a tuple with the SlaWarnedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *JobRequest) GetSlaWarnedAtOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.SlaWarnedAt) {
+		return nil, false
+	}
+	return o.SlaWarnedAt, true
+}
+
+// HasSlaWarnedAt returns a boolean if a field has been set.
+func (o *JobRequest) HasSlaWarnedAt() bool {
+	if o != nil && !IsNil(o.SlaWarnedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetSlaWarnedAt gets a reference to the given time.Time and assigns it to the SlaWarnedAt field.
+func (o *JobRequest) SetSlaWarnedAt(v time.Time) {
+	o.SlaWarnedAt = &v
+}
+
 // GetStatusVersion returns the StatusVersion field value if set, zero value otherwise.
 func (o *JobRequest) GetStatusVersion() int32 {
 	if o == nil || IsNil(o.StatusVersion) {
@@ -1050,6 +1186,9 @@ func (o JobRequest) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Assignment) {
 		toSerialize["assignment"] = o.Assignment
 	}
+	if !IsNil(o.Attention) {
+		toSerialize["attention"] = o.Attention
+	}
 	if !IsNil(o.BusinessId) {
 		toSerialize["business_id"] = o.BusinessId
 	}
@@ -1109,6 +1248,15 @@ func (o JobRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Skills) {
 		toSerialize["skills"] = o.Skills
+	}
+	if !IsNil(o.SlaDeadline) {
+		toSerialize["sla_deadline"] = o.SlaDeadline
+	}
+	if !IsNil(o.SlaEscalatedAt) {
+		toSerialize["sla_escalated_at"] = o.SlaEscalatedAt
+	}
+	if !IsNil(o.SlaWarnedAt) {
+		toSerialize["sla_warned_at"] = o.SlaWarnedAt
 	}
 	if !IsNil(o.StatusVersion) {
 		toSerialize["status_version"] = o.StatusVersion
